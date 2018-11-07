@@ -1,0 +1,20 @@
+{
+  "name": "vi18n",
+  "version": "0.0.1",
+  "description": "Another i18n solution for Vue (Nuxt) with auto generated keys",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vue",
+    "i18n"
+  ],
+  "author": "viabtc.com",
+  "license": "MIT",
+  "dependencies": {
+    "blueimp-md5": "^2.10.0",
+    "esprima": "^4.0.1",
+    "htmlparser2": "^3.10.0"
+  }
+}
