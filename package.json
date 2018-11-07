@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Another i18n solution for Vue (Nuxt) with auto generated keys",
   "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viabtc/viai18n-loader"
+  },
   "keywords": [
     "vue",
     "i18n"
