@@ -75,3 +75,7 @@ Then you can easily change languages to show by mutate this property in the stor
     }
 ```
 
+# Roadmap
+- [ ] Add cli tool to group all `*.messages.json` and serve a web page for human translators
+- [ ] Add example and better documentaion
+- [ ] Add tests
