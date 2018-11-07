@@ -1,8 +1,10 @@
-Another i18n solution for Vue(Nuxt) with auto generated keys （Under development)
+Another i18n solution for Vue (Nuxt) with auto generated keys 
+Currently under development, version 0.0.1, pull requests and suggestions are welcome.
 
 # Why?
 * We need auto generated key
     > There are only two hard things in Computer Science: cache invalidation and naming things. -- Phil Karlton
+    
     Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, it's not reasonable to waste time doing this job 
 * Text translations should be put just beside source code
     Some solutions extract all texts to a single json file, it's not conform to modularization
