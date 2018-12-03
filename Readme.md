@@ -1,5 +1,5 @@
 viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys 
-Currently under development, version 0.0.1, pull requests and suggestions are welcome.
+Currently under development, pull requests and suggestions are welcome.
 
 # Why?
 * We need auto generated key
@@ -7,7 +7,8 @@ Currently under development, version 0.0.1, pull requests and suggestions are we
     
     Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, it's not reasonable to waste time doing this job 
 * Text translations should be put just beside source code
-    Some solutions extract all texts to a single json file, it's not conform to modularization
+  
+  Some solutions extract all texts to a single json file, it's not conform to modularization
 
 # How it works?
 1. Find automatically texts to translate by two means: regex string or 'separator'(Refer to usage below). 
