@@ -83,6 +83,6 @@ Then you can easily change languages to show by mutate this property in the stor
 
 # Demo
 * if you want see the demo, you can download viai18n-loader.zip
-1.This example is based on nuxt.js, You can customize your own / 项目基于nuxt搭建
-2.npm install   // 下载依赖
-3.npm run dev   // 运行
+1.This example is based on nuxt.js, You can customize your own 
+2.npm install   
+3.npm run dev   
