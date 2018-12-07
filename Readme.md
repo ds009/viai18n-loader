@@ -80,3 +80,9 @@ Then you can easily change languages to show by mutate this property in the stor
 - [ ] Add cli tool to group all `*.messages.json` and serve a web page for human translators
 - [ ] Add example and better documentaion
 - [ ] Add tests
+
+# Demo
+* if you want see the demo, you can download viai18n-loader.zip
+1.This example is based on nuxt.js, You can customize your own / 项目基于nuxt搭建
+2.npm install   // 下载依赖
+3.npm run dev   // 运行
