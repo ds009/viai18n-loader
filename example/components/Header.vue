@@ -2,7 +2,7 @@
   <div class="header">
     <div @mouseover="langShow=true" @mouseout="langShow=false" class="lang-config">
 
-      <button id="set-lang">{{currentLangText}}</button>
+      <button id="set-lang">{{currentLangText}} {{$lang}}</button>
 
       <div class="lang-menu" v-if="langShow" v-for="item in availableLocales" :key="item.value"
            @click="onSetLang(item)">

@@ -1,4 +1,5 @@
 import  chineseS2T from 'chinese-s2t';
+
 export default {
   head: {
     title: 'Viai18n usage example',
@@ -7,7 +8,7 @@ export default {
     extend(webpackConfig, { isDev, isClient }) {
       webpackConfig.module.rules.push({ // this loader will generate *.messages.json beside *.vue files
         test: /\.vue$/,
-        exclude: [/node_modules/],
+        exclude: [/node_modules/,/\.nuxt/],
         loader: 'viai18n-loader',
         enforce: 'pre',
         options: {

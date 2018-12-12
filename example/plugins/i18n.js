@@ -5,6 +5,6 @@ import {mapGetters} from 'vuex';
 // !!! the key must be $lang, which will be referenced by the helper !!!
 Vue.mixin({
   computed: {
-    ...mapGetters({'$lang': 'currentLang'}),
+    ...mapGetters({'$lang': 'i18n/currentLang'}),
   }
 });

@@ -6,7 +6,7 @@
     "dependencies": {
         "chinese-s2t": "^1.0.0",
         "nuxt": "^2.3.4",
-        "viai18n-loader": "0.0.3",
+        "viai18n-loader": "0.0.4",
         "vuex": "^3.0.1",
         "webpack": "^4.27.1"
     },
