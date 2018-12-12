@@ -1,0 +1,17 @@
+{
+    "name": "my-app",
+    "scripts": {
+        "dev": "nuxt"
+    },
+    "dependencies": {
+        "chinese-s2t": "^1.0.0",
+        "nuxt": "^2.3.4",
+        "viai18n-loader": "0.0.3",
+        "vuex": "^3.0.1",
+        "webpack": "^4.27.1"
+    },
+    "devDependencies": {
+        "node-sass": "^4.11.0",
+        "sass-loader": "^7.1.0"
+    }
+}
