@@ -1,17 +1,17 @@
-viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys 
+viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys
 Currently under development, pull requests and suggestions are welcome.
 
 # Why?
 * We need auto generated key
     > There are only two hard things in Computer Science: cache invalidation and naming things. -- Phil Karlton
-    
-    Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, it's not reasonable to waste time doing this job 
+
+    Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, it's not reasonable to waste time doing this job
 * Text translations should be put just beside source code
-  
+
   Some solutions extract all texts to a single json file, it's not conform to modularization
 
 # How it works?
-1. Find automatically texts to translate by two means: regex string or 'separator'(Refer to usage below). 
+1. Find automatically texts to translate by two means: regex string or 'separator'(Refer to usage below).
 2. Keep first 8 characters of every matched text as key (and add 4 characters md5 hash to the key if text is longer than 8)
 3. Replace texts by translator markups using regex
 4. Create or update `filename.messages.json` to store translations, import this file in `filename.vue`
@@ -19,14 +19,16 @@ Currently under development, pull requests and suggestions are welcome.
 # Usage
 
 ## Config webpack
-Config example using nuxt.
-**Given `regString`, the loader will match all texts/attributes/string templates by `new RegExp(regString)`
+Config example based on [Nuxt.js](https://nuxtjs.org/).
+
+**Given `regString`, the loader will match all texts/attributes/string templates by `new RegExp(regString)`**
+
 **Given `separator`, the loader will ignore `regString`, The loader will match all texts between `separator`, for example `##text##`.**
 ```
     {
         test: /\.vue$/,
         exclude: [/node_modules/],
-        loader: 'vi18n-loader',
+        loader: 'viai18n-loader',
         enforce: 'pre',
         options: {
           updateMessagesFile: ctx.isClient && ctx.isDev, // only update messages file when it's dev and client(when using ssr)
@@ -49,40 +51,47 @@ Config example using nuxt.
             }
           }, {
             key: 'en_US',
-            translator: (matched) => {
-              return matched.replace(/^[R]+/, '')
-            }
+            // if translator is not given, the loader will use the default translator(translator of the first language, zh_Hans_CN here)
           }],
         }
       }
 ```
-## In .vue file
-* Add computed property `$lang` from which the plugin can read the current language.
-**This `$lang` is necessary for the loader to put messages in the right place**
-It can simply return the value from store, eg.:
+## Add a global plugin to tell our helper which language to show
+An example of plugin can be:
+```
+    import Vue from 'vue';
+    import {mapGetters} from 'vuex';
+
+    // !!! the key must be $lang, which will be referenced by the helper !!!
+    Vue.mixin({
+      computed: {
+        ...mapGetters({'$lang': 'currentLang'}),
+      }
+    });
+```
+The helper will insert code automatically to refer this `$lang` variable like this:
 ```
     computed:{
-        $lang(){
-            return this.$store.getters.lang
-        },
-    }
-```
-Then you can easily change languages to show by mutate this property in the store, eg.:
-```
-    methods:{
-        changeLang(lang){
-            this.$store.dispatch('setLang', lang)
+        $t(){
+            return messages[this.$lang]||messages['defaultLang']||{}
         }
     }
 ```
+`defaultLang` is the first language key set in config, `zh_Hans_CN` here in the example.
+
+## Demo
+check the example directory:
+
+1. This example is based on [Nuxt.js](https://nuxtjs.org/)
+2. Download this example and start by `npm install` then `npm run dev`
+3. Try changing texts and add some translations
+
+## Cli tool
+Please refer to the github repo of [viai18n-cli](https://github.com/viabtc/viai18n-cli)
 
 # Roadmap
-- [ ] Add cli tool to group all `*.messages.json` and serve a web page for human translators
-- [ ] Add example and better documentaion
+- [X] Add cli tool to group all `*.messages.json` and serve a web page for human translators
+- [X] Add example and better documentaion
 - [ ] Add tests
 
-# Demo
-* if you want see the demo, you can download viai18n-loader.zip
-1.This example is based on nuxt.js, You can customize your own 
-2.npm install   
-3.npm run dev   
+
