@@ -1,4 +1,4 @@
-import  chineseS2T from 'chinese-s2t';
+import chineseS2T from 'chinese-s2t';
 
 export default {
   head: {
