@@ -6,7 +6,7 @@ export default {
   },
   build: {
     extend(webpackConfig, { isDev, isClient }) {
-      webpackConfig.resolveLoader.modules.push('devPlugin')
+      // webpackConfig.resolveLoader.modules.push('devPlugin')
       webpackConfig.module.rules.push({ // this loader will generate *.messages.json beside *.vue files
         test: /\.vue$/,
         exclude: [/node_modules/,/\.nuxt/],

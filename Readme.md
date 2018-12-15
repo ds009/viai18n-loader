@@ -16,6 +16,13 @@ Currently under development, pull requests and suggestions are welcome.
 3. Replace texts by translator markups using regex
 4. Create or update `filename.messages.json` to store translations, import this file in `filename.vue`
 
+# **!!! Attentions !!!**
+* Since `this` at the top level of es6 module bind to `undefined`, but not the vue instance.
+
+  All target texts in script part should be put in functions(not fat arrow functions refer to [this doc](https://vuejs.org/v2/guide/instance.html#Data-and-Methods))
+* vue `data(){}` should not contain any target texts
+
+
 # Usage
 
 ## Config webpack
@@ -78,6 +85,9 @@ The helper will insert code automatically to refer this `$lang` variable like th
     }
 ```
 `defaultLang` is the first language key set in config, `zh_Hans_CN` here in the example.
+
+
+
 
 ## Demo
 check the example directory:

@@ -2,6 +2,7 @@
   <div class="page-index">
     <Header></Header>
     <h1>需要翻译的内容</h1>
+    <p>{{test}}</p>
   </div>
 </template>
 
@@ -9,8 +10,11 @@
   import Header from '../components/Header'
 
   export default {
-    components: {
-      Header,
+    components: {Header},
+    computed: {
+      test() {
+        return '测试'
+      },
     },
   }
 </script>
