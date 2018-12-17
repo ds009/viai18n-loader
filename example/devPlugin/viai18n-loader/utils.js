@@ -61,7 +61,7 @@ function generateTemplateReplacers(template, matchRegString, separator) {
     onattribute(name, text) {
       const targetReg = new RegExp(matchRegString)
       const matched = text.match(targetReg)
-      if(matched){
+      if (matched) {
         const origin = trimText(separator ? matched[1] : text)
         const hash = getTextKey(origin)
         const oldTextReg = name + '\\s*=\\s*(\'|")' + regSafeText(text) + '(\'|")'
@@ -75,7 +75,6 @@ function generateTemplateReplacers(template, matchRegString, separator) {
   })
   parser.write(template)
   parser.end()
-  console.log(replacers)
   return replacers
 }
 
@@ -88,31 +87,42 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
     if (matchExp) {
       // split text by {{}} expression
       const tokens = text.split(/({{.*?}})/)
+      let newText = ''
       tokens.forEach(t => {
-        if(!t){return}
+        if (!t) {
+          return
+        }
         const matchStr = t.match(targetReg)
         if (matchStr) {
           if (t[0] !== '{') {
             // simple text in template
             const origin = trimText(separator ? matchStr[1] : t) // the whole text but not only matched, because if may be a mix of different languages
             const hash = getTextKey(origin)
-            const newText = '{{$t["' + hash + '"]}}'
-            replacers.push({oldText: t, newText, origin, hash})
+            newText += '{{$t["' + hash + '"]}}'
+            replacers.push({origin, hash})// replace entire text once
           } else {
             const tokenInExpression = t.split(/(".*?")|('.*?')/)
-            tokenInExpression.forEach(token=>{
-              if(!token){return}
+            tokenInExpression.forEach(token => {
+              if (!token) {
+                return
+              }
               const matchToken = token.match(targetReg)
               if (matchToken) {
                 const origin = trimText(separator ? matchToken[1] : removeQuotes(token))
                 const hash = getTextKey(origin)
-                const newText = '$t["' + hash + '"]'
-                replacers.push({oldText: token, newText, origin, hash})
+                newText += '$t["' + hash + '"]'
+                replacers.push({origin, hash})
+              }else{
+                newText+=token
               }
             })
           }
         }
+        else {
+          newText += t
+        }
       });
+      replacers.push({oldText: text, newText})
     } else {
       const origin = trimText(separator ? matched[1] : text)
       const hash = getTextKey(origin)

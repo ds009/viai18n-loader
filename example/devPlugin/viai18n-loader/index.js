@@ -51,11 +51,15 @@ module.exports = function (source, map) {
       })
       replacers.forEach(replacer => {
         // replace source
-        sourceWithoutComment = sourceWithoutComment.replace(replacer.oldText, replacer.newText)
-        // generate translations
-        options.languages.forEach(lang => {
-          data[lang.key][replacer.hash] = lang.translator ? lang.translator(replacer.origin) : defaultTranslator(replacer.origin)
-        })
+        if(replacer.oldText){
+          sourceWithoutComment = sourceWithoutComment.replace(replacer.oldText, replacer.newText)
+        }
+        if(replacer.hash){
+          // generate translations
+          options.languages.forEach(lang => {
+            data[lang.key][replacer.hash] = lang.translator ? lang.translator(replacer.origin) : defaultTranslator(replacer.origin)
+          })
+        }
       })
       // write file with cacheTime (to handle webpack rebuild bug)
       utils.writeJsonToFile(data, filePath[1] + '.messages.json', options.cacheTime || 2000)
