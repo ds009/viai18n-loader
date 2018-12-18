@@ -50,6 +50,7 @@ module.exports = function (source, map) {
         data[lang.key] = {}
       })
       replacers.forEach(replacer => {
+        console.log(replacer)
         // replace source
         if(replacer.oldText){
           sourceWithoutComment = sourceWithoutComment.replace(replacer.oldText, replacer.newText)
@@ -73,5 +74,6 @@ module.exports = function (source, map) {
     // and insert $t (use default language if any language isn't found)
     sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, sourceWithoutComment)
   }
+  console.log(sourceWithoutComment)
   return sourceWithoutComment
 }

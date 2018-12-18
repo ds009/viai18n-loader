@@ -16,16 +16,20 @@ function removeQuotes(text) {
 function generateScriptReplacers(script, matchRegString, separator) {
   const tokens = esprima.tokenize(script)
   const replacers = []
+  const targets = {}
   tokens.filter(node => (node.type === 'Template' || node.type === 'String')).forEach(node => {
     // match result !== target text
     const matched = node.value.match(new RegExp(matchRegString))
     if (matched) {
       if (node.type === 'String') {
         // node.value has already quotes here
-        const origin = trimText(separator ? matched[1] : removeQuotes(node.value))
-        const hash = getTextKey(origin)
-        const newText = 'this.$t["' + hash + '"]'
-        replacers.push({oldText: node.value, newText, origin, hash})
+        if (!targets[node.value]) {
+          targets[node.value] = true
+          const origin = trimText(separator ? matched[1] : removeQuotes(node.value))
+          const hash = getTextKey(origin)
+          const newText = 'this.$t["' + hash + '"]'
+          replacers.push({oldText: new RegExp(regSafeText(node.value),'g'), newText, origin, hash})
+        }
       } else {
         // Template
         if (separator) {
@@ -112,8 +116,8 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
                 const hash = getTextKey(origin)
                 newText += '$t["' + hash + '"]'
                 replacers.push({origin, hash})
-              }else{
-                newText+=token
+              } else {
+                newText += token
               }
             })
           }
