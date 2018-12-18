@@ -174,10 +174,22 @@ function writeJsonToFile(data, filePath) {
         Object.assign(newData[lang], oldData[lang])
       }
     })
-    fs.writeFileSync(filePath, JSON.stringify(newData, null, 4), {flag: 'w'})
+    fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'})
   } catch (e) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 4), {flag: 'wx'})
+    fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(data), null, 4), {flag: 'wx'})
   }
+}
+
+function sortObjectByKey(unordered){
+  const ordered = {};
+  Object.keys(unordered).sort().forEach(function(key) {
+    if(typeof unordered[key] ==='string'){
+      ordered[key] = unordered[key];
+    }else{
+      ordered[key] = sortObjectByKey(unordered[key]);
+    }
+  });
+  return ordered
 }
 
 function importMessages(filename) {
