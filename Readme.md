@@ -20,7 +20,6 @@ Currently under development, pull requests and suggestions are welcome.
 * Since `this` at the top level of es6 module bind to `undefined`, but not the vue instance.
 
   All target texts in script part should be put in functions(not fat arrow functions refer to [this doc](https://vuejs.org/v2/guide/instance.html#Data-and-Methods))
-* vue `data(){}` should not contain any target texts
 
 
 # Usage
@@ -48,13 +47,13 @@ Config example based on [Nuxt.js](https://nuxtjs.org/).
             key: 'zh_Hans_CN',
             translator: (matched) => {
               // Delete repeat mark R, sometimes we need a text to be translated differently
-              return matched.replace(/^[R]+/, '')
+              return matched.replace(/^\[R\]+/, '')
             }
           }, {
             key: 'zh_Hant_HK',
             translator: (matched) => {
               // example to auto translate simplified chinese to traditional
-              return chineseS2T.s2t(matched.replace(/^[R]+/, ''))
+              return chineseS2T.s2t(matched.replace(/^\[R\]+/, ''))
             }
           }, {
             key: 'en_US',
@@ -78,10 +77,12 @@ An example of plugin can be:
 ```
 The helper will insert code automatically to refer this `$lang` variable like this:
 ```
-    computed:{
-        $t(){
-            return messages[this.$lang]||messages['defaultLang']||{}
-        }
+    methods:{
+        $t(key){
+              if(!this.$lang && !messages["${defaultLang}"]) return key;
+              const trans = messages[this.$lang]||messages["${defaultLang}"]||{};
+              return trans[key];
+        },
     }
 ```
 `defaultLang` is the first language key set in config, `zh_Hans_CN` here in the example.
