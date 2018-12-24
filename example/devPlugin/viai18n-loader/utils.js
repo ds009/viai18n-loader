@@ -28,7 +28,7 @@ function generateScriptReplacers(script, matchRegString, separator) {
           const origin = trimText(separator ? matched[1] : removeQuotes(node.value))
           const hash = getTextKey(origin)
           const newText = 'this.$t("' + hash + '")'
-          replacers.push({oldText: new RegExp(regSafeText(node.value),'g'), newText, origin, hash})
+          replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash})
         }
       } else {
         // Template
@@ -90,7 +90,7 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
     const matchExp = text.match(/{{([\s\S]*)}}/)
     if (matchExp) {
       // split text by {{}} expression
-      const tokens = text.split(/({{.*?}})/)
+      const tokens = text.split(/({{[\s\S]*?}})/)
       let newText = ''
       tokens.forEach(t => {
         if (!t) {
@@ -100,12 +100,12 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
         if (matchStr) {
           if (t[0] !== '{') {
             // simple text in template
-            const origin = trimText(separator ? matchStr[1] : t) // the whole text but not only matched, because if may be a mix of different languages
+            const origin = trimText(separator ? matchStr[1] : t) // the whole text but not only matched, because it may be a mix of different languages
             const hash = getTextKey(origin)
             newText += '{{$t("' + hash + '")}}'
             replacers.push({origin, hash})// replace entire text once
           } else {
-            const tokenInExpression = t.split(/(".*?")|('.*?')/)
+            const tokenInExpression = t.split(/("[\s\S]*?")|('[\s\S]*?')/)
             tokenInExpression.forEach(token => {
               if (!token) {
                 return
@@ -171,7 +171,7 @@ function writeJsonToFile(data, filePath) {
       if (!newData[lang]) {
         newData[lang] = oldData[lang]
       } else {
-        Object.assign(newData[lang], oldData[lang])
+        Object.keys(newData[lang]).forEach(k => newData[lang][k] = oldData[lang][k])
       }
     })
     fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'})
@@ -180,12 +180,12 @@ function writeJsonToFile(data, filePath) {
   }
 }
 
-function sortObjectByKey(unordered){
+function sortObjectByKey(unordered) {
   const ordered = {};
-  Object.keys(unordered).sort().forEach(function(key) {
-    if(typeof unordered[key] ==='string'){
+  Object.keys(unordered).sort().forEach(function (key) {
+    if (typeof unordered[key] === 'string') {
       ordered[key] = unordered[key];
-    }else{
+    } else {
       ordered[key] = sortObjectByKey(unordered[key]);
     }
   });
