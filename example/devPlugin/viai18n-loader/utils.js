@@ -2,6 +2,7 @@ const esprima = require('esprima')
 const htmlparser = require('htmlparser2') // high performance according to https://github.com/fb55/htmlparser2
 const md5 = require('blueimp-md5')
 const fs = require('fs')
+const deprecatedMark = '@DEPRECATED@'
 
 function getFileName(resourcePath) {
   const paths = resourcePath.split('/')
@@ -66,11 +67,31 @@ function generateTemplateReplacers(template, matchRegString, separator) {
       const targetReg = new RegExp(matchRegString)
       const matched = text.match(targetReg)
       if (matched) {
-        const origin = trimText(separator ? matched[1] : text)
-        const hash = getTextKey(origin)
-        const oldTextReg = name + '\\s*=\\s*(\'|")' + regSafeText(text) + '(\'|")'
-        const newText = nameAsVariable(name) + '=\'$t("' + hash + '")\''
-        replacers.push({oldText: new RegExp(oldTextReg), newText, origin, hash})
+        const tokenInExpression = text.split(/("[\s\S]*?")|('[\s\S]*?')/)
+        if (tokenInExpression.length > 1) {
+          let newText = ''
+          tokenInExpression.forEach(token => {
+            if (!token) {
+              return
+            }
+            const matchToken = token.match(targetReg)
+            if (matchToken) {
+              const origin = trimText(separator ? matchToken[1] : removeQuotes(token))
+              const hash = getTextKey(origin)
+              newText += '$t("' + hash + '")'
+              replacers.push({origin, hash})
+            } else {
+              newText += token
+            }
+          })
+          replacers.push({oldText: text, newText})
+        } else {
+          const origin = trimText(separator ? matched[1] : text)
+          const hash = getTextKey(origin)
+          const oldTextReg = name + '\\s*=\\s*(\'|")' + regSafeText(text) + '(\'|")'
+          const newText = nameAsVariable(name) + '=\'$t("' + hash + '")\''
+          replacers.push({oldText: new RegExp(oldTextReg), newText, origin, hash})
+        }
       }
     },
     ontext(text) {
@@ -171,7 +192,33 @@ function writeJsonToFile(data, filePath) {
       if (!newData[lang]) {
         newData[lang] = oldData[lang]
       } else {
-        Object.keys(newData[lang]).forEach(k => newData[lang][k] = oldData[lang][k])
+        Object.keys(newData[lang]).forEach(k => {
+          let dKey = k
+          if (dKey.indexOf(deprecatedMark) >= 0) {
+            dKey = dKey.replace(deprecatedMark, '')
+          }
+          if (oldData[lang][dKey] !== undefined) {
+            newData[lang][k] = oldData[lang][dKey]
+          }
+        })
+        Object.keys(oldData[lang]).forEach(k => {
+          if (newData[lang][k] === undefined) {
+            if (k.indexOf(deprecatedMark) < 0) {
+              const dKey = k + deprecatedMark
+              // mark an old item as deprecated
+              newData[lang][dKey] = oldData[lang][k]
+            } else {
+              // a marked deprecated
+              const dKey = k.replace(deprecatedMark, '')
+              if (newData[lang][dKey] === undefined) {
+                // not reused item, keep deprecated mark
+                newData[lang][k] = oldData[lang][k]
+              } else {
+                // reused, ignore the old deprecated mark item
+              }
+            }
+          }
+        })
       }
     })
     fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'})
