@@ -29,7 +29,7 @@ function generateScriptReplacers(script, matchRegString, separator) {
           const origin = trimText(separator ? matched[1] : removeQuotes(node.value))
           const hash = getTextKey(origin)
           const newText = 'this.$t("' + hash + '")'
-          replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash})
+          replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash, isScript:true})
         }
       } else {
         // Template
@@ -39,7 +39,7 @@ function generateScriptReplacers(script, matchRegString, separator) {
             const origin = trimText(t.match(new RegExp(matchRegString))[1])
             const hash = getTextKey(origin)
             const newText = '${this.$t("' + hash + '")}'
-            replacers.push({oldText: t, newText, origin, hash})
+            replacers.push({oldText: t, newText, origin, hash, isScript:true})
           })
         } else {
           const groups = node.value.match(/^([`}])([\s\S]*)((\${)|`)/)
@@ -47,7 +47,7 @@ function generateScriptReplacers(script, matchRegString, separator) {
             const origin = trimText(groups[2])
             const hash = getTextKey(origin)
             const newText = groups[1] + '${this.$t("' + hash + '")}' + groups[3]
-            replacers.push({oldText: node.value, newText, origin, hash})
+            replacers.push({oldText: node.value, newText, origin, hash, isScript:true})
 
           } else {
             console.error('Error when retrieving text from script template: ' + node.value)
@@ -287,7 +287,7 @@ function matchDefaultObject(source) {
 }
 
 function matchScript(source) {
-  const matched = source.match(/(<script[^>]*>)([\s\S]*)<\/script>/)
+  const matched = source.match(/([\s\S]*?<script[^>]*>)([\s\S]*)(<\/script>[\s\S]*)/)
   return matched
 }
 

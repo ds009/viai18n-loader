@@ -28,16 +28,39 @@ module.exports = function (source, map) {
   let sourceWithoutComment = utils.removeComments(source)
   const filePath = this.resourcePath.match(/(.*)((\.vue$)|(\.js$))/)
   // find template and script part
-  const originalScript = utils.matchScript(sourceWithoutComment)
-  const originalTemplate = utils.matchTemplate(sourceWithoutComment)
+  const replaceParts={}
+  const matchScript = utils.matchScript(sourceWithoutComment)
+  if (matchScript && matchScript[2]) {
+    replaceParts.parts=matchScript.slice(1) // will be used to replace and reform the source code
+    replaceParts.scriptIndex= 1
+    replaceParts.script = replaceParts.parts[1] // will be used to find target texts and generate replacers
+    // which part contains template
+    const matchStart = utils.matchTemplate(replaceParts.parts[0])
+    const matchEnd = utils.matchTemplate(replaceParts.parts[2])
+    if(matchStart){
+      replaceParts.templateIndex=0
+      replaceParts.template = matchStart[0]
+    }
+    if(matchEnd){
+      replaceParts.templateIndex=2
+      replaceParts.template = matchEnd[0]
+    }
+  }else{
+    const matchTemplate = utils.matchTemplate(sourceWithoutComment)
+    if(matchTemplate){
+      replaceParts.parts=[sourceWithoutComment]
+      replaceParts.templateIndex=0
+      replaceParts.template =matchTemplate[0]
+    }
+  }
 
   // get replacers from script and template
   let replacers = []
-  if (originalScript && originalScript[2]) {// the second group is script body
-    replacers = replacers.concat(utils.generateScriptReplacers(originalScript[2], matchRegString, options.separator))
+  if (replaceParts.script) {// the second group is script body
+    replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.separator))
   }
-  if (originalTemplate) {
-    replacers = replacers.concat(utils.generateTemplateReplacers(originalTemplate[0], matchRegString, options.separator))
+  if (replaceParts.template) {
+    replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.separator))
   }
   // replace old texts by new texts using regex
   if (replacers.length) {
@@ -50,12 +73,12 @@ module.exports = function (source, map) {
         data[lang.key] = {}
       })
       replacers.forEach(replacer => {
-        console.log(replacer)
         // replace source
-        if(replacer.oldText){
-          sourceWithoutComment = sourceWithoutComment.replace(replacer.oldText, replacer.newText)
+        if (replacer.oldText) {
+          const replaceIndex = replacer.isScript?replaceParts.scriptIndex:replaceParts.templateIndex
+          replaceParts.parts[replaceIndex]=replaceParts.parts[replaceIndex].replace(replacer.oldText, replacer.newText)
         }
-        if(replacer.hash){
+        if (replacer.hash) {
           // generate translations
           options.languages.forEach(lang => {
             data[lang.key][replacer.hash] = lang.translator ? lang.translator(replacer.origin) : defaultTranslator(replacer.origin)
@@ -63,16 +86,19 @@ module.exports = function (source, map) {
         }
       })
       // write file with cacheTime (to handle webpack rebuild bug)
-      utils.writeJsonToFile(data, filePath[1] + '.messages.json', options.cacheTime || 2000)
+      utils.writeJsonToFile(data, filePath[1] + '.messages.json')
     } else {
       replacers.forEach(replacer => {
         // replace source
-        sourceWithoutComment = sourceWithoutComment.replace(replacer.oldText, replacer.newText)
+        if (replacer.oldText) {
+          const replaceIndex = replacer.isScript?replaceParts.scriptIndex:replaceParts.templateIndex
+          replaceParts.parts[replaceIndex]=replaceParts.parts[replaceIndex].replace(replacer.oldText, replacer.newText)
+        }
       })
     }
     // import messages
     // and insert $t (use default language if any language isn't found)
-    sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, sourceWithoutComment)
+    sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
   }
   console.log(sourceWithoutComment)
   return sourceWithoutComment
