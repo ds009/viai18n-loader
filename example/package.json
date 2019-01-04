@@ -1,5 +1,5 @@
 {
-    "name": "my-app",
+    "name": "viai18n-loader-example",
     "scripts": {
         "dev": "nuxt"
     },

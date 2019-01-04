@@ -14,7 +14,7 @@ function removeQuotes(text) {
   return text.match(/^(\s*)['"](.*)['"](\s*)$/)[2]
 }
 
-function generateScriptReplacers(script, matchRegString, separator) {
+function generateScriptReplacers(script, matchRegString, delimiter) {
   const tokens = esprima.tokenize(script)
   const replacers = []
   const targets = {}
@@ -26,14 +26,14 @@ function generateScriptReplacers(script, matchRegString, separator) {
         // node.value has already quotes here
         if (!targets[node.value]) {
           targets[node.value] = true
-          const origin = trimText(separator ? matched[1] : removeQuotes(node.value))
+          const origin = trimText(delimiter ? matched[1] : removeQuotes(node.value))
           const hash = getTextKey(origin)
           const newText = 'this.$t("' + hash + '")'
           replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash, isScript:true})
         }
       } else {
         // Template
-        if (separator) {
+        if (delimiter) {
           const groups = node.value.match(new RegExp(matchRegString, 'g'))
           groups.forEach(t => {
             const origin = trimText(t.match(new RegExp(matchRegString))[1])
@@ -60,7 +60,7 @@ function generateScriptReplacers(script, matchRegString, separator) {
   return replacers
 }
 
-function generateTemplateReplacers(template, matchRegString, separator) {
+function generateTemplateReplacers(template, matchRegString, delimiter) {
   let replacers = []
   const parser = new htmlparser.Parser({
     onattribute(name, text) {
@@ -76,7 +76,7 @@ function generateTemplateReplacers(template, matchRegString, separator) {
             }
             const matchToken = token.match(targetReg)
             if (matchToken) {
-              const origin = trimText(separator ? matchToken[1] : removeQuotes(token))
+              const origin = trimText(delimiter ? matchToken[1] : removeQuotes(token))
               const hash = getTextKey(origin)
               newText += '$t("' + hash + '")'
               replacers.push({origin, hash})
@@ -86,7 +86,7 @@ function generateTemplateReplacers(template, matchRegString, separator) {
           })
           replacers.push({oldText: text, newText})
         } else {
-          const origin = trimText(separator ? matched[1] : text)
+          const origin = trimText(delimiter ? matched[1] : text)
           const hash = getTextKey(origin)
           const oldTextReg = name + '\\s*=\\s*(\'|")' + regSafeText(text) + '(\'|")'
           const newText = nameAsVariable(name) + '=\'$t("' + hash + '")\''
@@ -95,7 +95,7 @@ function generateTemplateReplacers(template, matchRegString, separator) {
       }
     },
     ontext(text) {
-      replacers = replacers.concat(parseExpressionInTemplate(text, matchRegString, separator))
+      replacers = replacers.concat(parseExpressionInTemplate(text, matchRegString, delimiter))
     }
   },{lowerCaseAttributeNames:false})
   parser.write(template)
@@ -103,7 +103,7 @@ function generateTemplateReplacers(template, matchRegString, separator) {
   return replacers
 }
 
-function parseExpressionInTemplate(text, matchRegString, separator) {
+function parseExpressionInTemplate(text, matchRegString, delimiter) {
   const replacers = []
   const targetReg = new RegExp(matchRegString)
   const matched = text.match(targetReg)
@@ -121,7 +121,7 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
         if (matchStr) {
           if (t[0] !== '{') {
             // simple text in template
-            const origin = trimText(separator ? matchStr[1] : t) // the whole text but not only matched, because it may be a mix of different languages
+            const origin = trimText(delimiter ? matchStr[1] : t) // the whole text but not only matched, because it may be a mix of different languages
             const hash = getTextKey(origin)
             newText += '{{$t("' + hash + '")}}'
             replacers.push({origin, hash})// replace entire text once
@@ -133,7 +133,7 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
               }
               const matchToken = token.match(targetReg)
               if (matchToken) {
-                const origin = trimText(separator ? matchToken[1] : removeQuotes(token))
+                const origin = trimText(delimiter ? matchToken[1] : removeQuotes(token))
                 const hash = getTextKey(origin)
                 newText += '$t("' + hash + '")'
                 replacers.push({origin, hash})
@@ -149,7 +149,7 @@ function parseExpressionInTemplate(text, matchRegString, separator) {
       });
       replacers.push({oldText: text, newText})
     } else {
-      const origin = trimText(separator ? matched[1] : text)
+      const origin = trimText(delimiter ? matched[1] : text)
       const hash = getTextKey(origin)
       const oldTextReg = '>\\s*' + regSafeText(text) + '\\s*<'
       const newText = '>{{$t("' + hash + '")}}<'
@@ -302,7 +302,6 @@ module.exports = {
   generateScriptReplacers,
   generateTemplateReplacers,
   writeJsonToFile,
-  importMessages,
   insert$t,
   matchTemplate,
   matchScript,

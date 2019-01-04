@@ -14,10 +14,10 @@ module.exports = function (source, map) {
 
   // ignore excluded files
   if (!this.resourcePath || (options.exclude && this.resourcePath.match(options.exclude))) return source
-  // use regString or separator to find targets
+  // use regString or delimiter to find targets
   let matchRegString = options.regString
-  if (options.separator) {
-    matchRegString = options.separator + '(.+?)' + options.separator
+  if (options.delimiter) {
+    matchRegString = options.delimiter + '(.+?)' + options.delimiter
   }
   if (!source.match(matchRegString)) {
     // nothing to translate
@@ -57,10 +57,10 @@ module.exports = function (source, map) {
   // get replacers from script and template
   let replacers = []
   if (replaceParts.script) {// the second group is script body
-    replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.separator))
+    replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.delimiter))
   }
   if (replaceParts.template) {
-    replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.separator))
+    replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.delimiter))
   }
   // replace old texts by new texts using regex
   if (replacers.length) {
@@ -100,6 +100,5 @@ module.exports = function (source, map) {
     // and insert $t (use default language if any language isn't found)
     sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
   }
-  console.log(sourceWithoutComment)
   return sourceWithoutComment
 }

@@ -1,8 +1,8 @@
 {
   "name": "viai18n-loader",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "Another i18n solution for Vue (Nuxt) with auto generated keys",
-  "main": "lib/index.js",
+  "main": "viai18n-loader/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/viabtc/viai18n-loader"
@@ -16,6 +16,7 @@
   "dependencies": {
     "blueimp-md5": "^2.10.0",
     "esprima": "^4.0.1",
-    "htmlparser2": "^3.10.0"
+    "htmlparser2": "^3.10.0",
+    "webpack": "^4.28.3"
   }
 }
