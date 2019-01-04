@@ -104,6 +104,7 @@ We provide a cli tool to group all `*.messages.json` and serve a web page for hu
 Please refer to the github repo of [viai18n-cli](https://github.com/viabtc/viai18n-cli)
 
 # Roadmap
+- [ ] Support JSX
 - [ ] Add tests
 
 

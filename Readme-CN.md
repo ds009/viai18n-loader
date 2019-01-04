@@ -109,6 +109,7 @@
 请查看对应的项目仓库 [viai18n-cli](https://github.com/viabtc/viai18n-cli)
 
 # 路线图
-- [ ] Add tests
+- [ ] 支持 JSX
+- [ ] 添加测试
 
 
