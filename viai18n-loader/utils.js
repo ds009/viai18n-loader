@@ -187,10 +187,11 @@ function trimText(text) {
 }
 
 function getTextKey(text) { // 8 chars text with 4 chars hash should be enough
-  let textKey = text.replace(/[\s\r\n]/g, '').slice(0, 8)
+  const trimed = text.replace(/[\s\r\n]/g, '')
+  const textKey = trimed.slice(0, 8)
 
   //  八个首字符+hash
-  return text.length > 8 ? `${textKey}_${md5(text).slice(0, 4)}` : textKey
+  return trimed.length > 8 ? `${textKey}_${md5(text).slice(0, 4)}` : textKey
 }
 
 function writeJsonToFile(data, filePath) {
