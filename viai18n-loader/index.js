@@ -96,9 +96,12 @@ module.exports = function (source, map) {
         }
       })
     }
+
     // import messages
     // and insert $t (use default language if any language isn't found)
     sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
+    console.log(replacers)
+    console.log(sourceWithoutComment)
   }
   return sourceWithoutComment
 }

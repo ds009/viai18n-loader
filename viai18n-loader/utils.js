@@ -78,7 +78,12 @@ function generateTemplateReplacers(template, matchRegString, delimiter) {
             if (matchToken) {
               const origin = trimText(delimiter ? matchToken[1] : removeQuotes(token))
               const hash = getTextKey(origin)
-              newText += '$t("' + hash + '")'
+              // quotes in same type quotes cause bugs
+              if(token[0]==='\''){
+                newText += "$t('" + hash + "')"
+              }else{
+                newText += '$t("' + hash + '")'
+              }
               replacers.push({origin, hash})
             } else {
               newText += token
@@ -135,7 +140,12 @@ function parseExpressionInTemplate(text, matchRegString, delimiter) {
               if (matchToken) {
                 const origin = trimText(delimiter ? matchToken[1] : removeQuotes(token))
                 const hash = getTextKey(origin)
-                newText += '$t("' + hash + '")'
+                // quotes in same type quotes cause bugs
+                if(token[0]==='\''){
+                  newText += "$t('" + hash + "')"
+                }else{
+                  newText += '$t("' + hash + '")'
+                }
                 replacers.push({origin, hash})
               } else {
                 newText += token
@@ -165,6 +175,7 @@ function regSafeText(text) {
     .replace(/\[/g, '\\[').replace(/\]/g, '\\]')
     .replace(/\?/g, '\\?').replace(/\$/g, '\\$')
     .replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+    .replace(/\|/g, '\\|')
 }
 
 function nameAsVariable(name) {
@@ -292,7 +303,7 @@ function matchScript(source) {
 }
 
 function removeComments(source) {
-  let sourceWithoutComment = source.replace(/<!--.*?-->/igm, '')
+  let sourceWithoutComment = source.replace(/<!--[\s\S]*?-->/igm, '')
   // remove comments in template, esprima.tokenize will ignore comments in js
   return sourceWithoutComment
 }
