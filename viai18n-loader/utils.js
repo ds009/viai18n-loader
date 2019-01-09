@@ -233,7 +233,7 @@ function writeJsonToFile(data, filePath) {
         })
       }
     })
-    fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'})
+    setTimeout(()=>fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'}),300) // update old file, timeout to trigger webpack reload
   } catch (e) {
     fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(data), null, 4), {flag: 'wx'})
   }
@@ -261,7 +261,7 @@ function insert$t(filename, defaultLang, source) {
     $t(key){
       if(!this.$lang && !messages["${defaultLang}"]) return key;
       const trans = messages[this.$lang]||messages["${defaultLang}"]||{};
-      return trans[key];
+      return trans[key]===undefined?key:trans[key];
     },
   `
   const simpleExport = 'export default { methods:{' + messageProp + '} }'
