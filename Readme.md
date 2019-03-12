@@ -1,7 +1,7 @@
 viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys
 Currently under development, pull requests and suggestions are welcome.
 
-# [Documentation in Chinese 中文文档](https://github.com/viabtc/viai18n-loader/blob/master/Readme-CN.md)
+# [Documentation in Chinese 中文文档](https://github.com/ds009/viai18n-loader/blob/master/Readme-CN.md)
 
 # Why?
 * We need auto generated key
