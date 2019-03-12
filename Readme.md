@@ -101,7 +101,7 @@ check the example directory:
 
 ## Cli tool
 We provide a cli tool to group all `*.messages.json` and serve a web page for human translators
-Please refer to the github repo of [viai18n-cli](https://github.com/viabtc/viai18n-cli)
+Please refer to the github repo of [viai18n-cli](https://github.com/dakang496/viai18n-cli)
 
 # Roadmap
 - [ ] Support JSX

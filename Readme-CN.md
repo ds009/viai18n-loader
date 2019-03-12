@@ -106,7 +106,7 @@
 
 ## Cli 工具
 我们提供了一个辅助工具用于集合所有待翻译文案，并在网页中展示方便翻译，最终再将翻译好的文案
-请查看对应的项目仓库 [viai18n-cli](https://github.com/viabtc/viai18n-cli)
+请查看对应的项目仓库 [viai18n-cli](https://github.com/dakang496/viai18n-cli)
 
 # 路线图
 - [ ] 支持 JSX
