@@ -5,7 +5,7 @@
     <p title="一段中文">{{test}}</p> <div class="row-item input-item">
     <input v-model="contractAddress" placeholder="输入链接"  class="input">
   </div>
-    <p class="name">源代码：</p>
+    <p class="name">反方规范腐反对跟复古风格个人更好听不让他果然要不你也认同隔壁认同蛋糕dfvre：</p>
     <div class="row-item input-item">
       <input v-model="sourceCode" placeholder="输入链接"  class="input">
     </div>

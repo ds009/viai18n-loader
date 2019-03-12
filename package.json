@@ -5,13 +5,13 @@
   "main": "viai18n-loader/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/viabtc/viai18n-loader"
+    "url": "https://github.com/ds009/viai18n-loader"
   },
   "keywords": [
     "vue",
     "i18n"
   ],
-  "author": "viabtc.com",
+  "author": "ds009",
   "license": "MIT",
   "dependencies": {
     "blueimp-md5": "^2.10.0",
