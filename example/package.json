@@ -1,7 +1,7 @@
 {
     "name": "viai18n-loader-example",
     "scripts": {
-        "dev": "nuxt"
+        "dev": "nuxt --port=3001"
     },
     "dependencies": {
         "chinese-s2t": "^1.0.0",

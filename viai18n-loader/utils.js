@@ -194,43 +194,54 @@ function getTextKey(text) { // 8 chars text with 4 chars hash should be enough
   return trimed.length > 8 ? `${textKey}_${md5(text).slice(0, 4)}` : textKey
 }
 
-function writeJsonToFile(data, filePath) {
+function textTranslated(key, text) {
+  return key!==getTextKey(text)
+}
+
+function writeJsonToFile(data, filePath, ignoreDeprecatedMarkLangs=[]) {
   try {
     const file = fs.readFileSync(filePath)
     const oldData = JSON.parse(file)
     const newData = Object.assign({}, data)
-    // assign old data, only two levels
+    // assign old data, merge with new data, only two levels
     Object.keys(oldData).forEach(lang => {
       if (!newData[lang]) {
+        // keep all oldData when a lang is not presented in newData
         newData[lang] = oldData[lang]
       } else {
         Object.keys(newData[lang]).forEach(k => {
-          let dKey = k
-          if (dKey.indexOf(deprecatedMark) >= 0) {
-            dKey = dKey.replace(deprecatedMark, '')
-          }
-          if (oldData[lang][dKey] !== undefined) {
-            newData[lang][k] = oldData[lang][dKey]
-          }
-        })
-        Object.keys(oldData[lang]).forEach(k => {
-          if (newData[lang][k] === undefined) {
-            if (k.indexOf(deprecatedMark) < 0) {
-              const dKey = k + deprecatedMark
-              // mark an old item as deprecated
-              newData[lang][dKey] = oldData[lang][k]
-            } else {
-              // a marked deprecated
-              const dKey = k.replace(deprecatedMark, '')
-              if (newData[lang][dKey] === undefined) {
-                // not reused item, keep deprecated mark
-                newData[lang][k] = oldData[lang][k]
-              } else {
-                // reused, ignore the old deprecated mark item
-              }
+          if (oldData[lang][k] !== undefined) {
+            // old text may be translated already, copy its value
+            newData[lang][k] = oldData[lang][k]
+          } else {
+            // reuse deprecated old text
+            const dKey = k.replace(deprecatedMark, '')
+            if(oldData[lang][dKey]){
+              newData[lang][k] = oldData[lang][dKey]
             }
           }
         })
+        if(ignoreDeprecatedMarkLangs.indexOf(lang)<0) {
+          Object.keys(oldData[lang]).forEach(k => {
+            // for each text which is translated but not in newData, mark as deprecated
+            if (textTranslated(k, oldData[lang][k]) && newData[lang][k] === undefined) {
+              if (k.indexOf(deprecatedMark) < 0) {
+                const dKey = k + deprecatedMark
+                // mark an old item as deprecated when no more in newData
+                newData[lang][dKey] = oldData[lang][k]
+              } else {
+                // a marked deprecated
+                const dKey = k.replace(deprecatedMark, '')
+                if (newData[lang][dKey] === undefined) {
+                  // not reused item, keep deprecated mark
+                  newData[lang][k] = oldData[lang][k]
+                } else {
+                  // reused, ignore the old deprecated mark item
+                }
+              }
+            }
+          })
+        }
       }
     })
     setTimeout(()=>fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'}),300) // update old file, timeout to trigger webpack reload

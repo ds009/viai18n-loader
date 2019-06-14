@@ -188,6 +188,7 @@
     head() {
       return {
         title: "投票上币" ,
+
         // meta: [
         //   {
         //     hid: "g_viewport",
@@ -233,7 +234,7 @@
         whitePaper: "",
         browser: "",
         contractAddress: "",
-        sourceCode: "",
+        sourceCode: 'test贝尔v 奋斗',
         communities: [],
         contacts: [
           {

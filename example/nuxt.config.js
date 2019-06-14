@@ -25,13 +25,15 @@ export default {
             translator: (matched) => {
               // Delete repeat mark R, sometimes we need a text to be translated differently
               return matched.replace(/^[R]+/, '');
-            }
+            },
+            ignoreDeprecated: true,
           }, {
             key: 'zh_Hant_HK',
             translator: (matched) => {
               // example to auto translate simplified chinese to traditional
               return chineseS2T.s2t(matched.replace(/^[R]+/, ''));
-            }
+            },
+            ignoreDeprecated: true,
           }, {
             key: 'en_US',
             // if translator is not given, the loader will use the default translator(translator of the first language, zh_Hans_CN here)

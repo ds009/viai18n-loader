@@ -26,5 +26,10 @@
         return '测试'
       },
     },
+    data(){
+      return {
+        sourceCode: '测序的 v 呃呃奋斗奋斗'
+      }
+    }
   }
 </script>
