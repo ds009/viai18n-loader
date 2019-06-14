@@ -5,7 +5,7 @@
     },
     "dependencies": {
         "chinese-s2t": "^1.0.0",
-        "nuxt": "^2.3.4",
+        "nuxt": "^2.6.3",
         "vuex": "^3.0.1",
         "webpack": "^4.27.1"
     },
@@ -14,7 +14,7 @@
         "blueimp-md5": "^2.10.0",
         "esprima": "^4.0.1",
         "htmlparser2": "^3.10.0",
-        "node-sass": "^4.11.0",
+        "node-sass": "^4.12.0",
         "sass-loader": "^7.1.0"
     }
 }
