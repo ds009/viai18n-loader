@@ -1,20 +1,22 @@
-viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys
+Viai18n-loader - another webpack loader i18n solution for Vue (Nuxt) with auto generated keys.
+
 Currently under development, pull requests and suggestions are welcome.
 
 # [Documentation in Chinese 中文文档](https://github.com/ds009/viai18n-loader/blob/master/Readme-CN.md)
 
 # Why?
-* We need auto generated key
+* We need auto generated keys for texts to be translated
     > There are only two hard things in Computer Science: cache invalidation and naming things. -- Phil Karlton
 
-    Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, it's not reasonable to waste time doing this job
-* Text translations should be put just beside source code
+  Most i18n solutions ask developers to name each text with a unique key, like `$t("message.hello")`, naming is so annoying, it's not reasonable to waste time doing this job
+
+* Text translations should be put just beside source codes
 
   Some solutions extract all texts to a single json file, it's not conform to modularization
 
 # How it works?
 1. Find automatically texts to translate by two means: regex string or 'delimiter'(Refer to usage below).
-2. Keep first 8 characters of every matched text as key (and add 4 characters md5 hash to the key if text is longer than 8)
+2. Keep first 8 characters of every matched text as key (and append 4 characters md5 hash to the key if the text is longer than 8)
 3. Replace texts by translator markups using regex
 4. Create or update `filename.messages.json` to store translations, import this file in `filename.vue`
 
