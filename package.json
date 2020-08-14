@@ -1,6 +1,6 @@
 {
   "name": "viai18n-loader",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "Another i18n solution for Vue (Nuxt) with auto generated keys",
   "main": "viai18n-loader/index.js",
   "repository": {

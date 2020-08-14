@@ -1,7 +1,7 @@
 <template>
   <div class="page-index">
     <Header></Header>
-    <h1>需要翻译的内容</h1>
+    <h1>grhbrtg发个红包发个红包给</h1>
     <p title="一段中文">{{test}}</p> <div class="row-item input-item">
     <input v-model="contractAddress" placeholder="输入链接"  class="input">
   </div>

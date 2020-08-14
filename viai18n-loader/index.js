@@ -14,6 +14,7 @@ module.exports = function (source, map) {
 
   // ignore excluded files
   if (!this.resourcePath || (options.exclude && this.resourcePath.match(options.exclude))) return source
+  if (/\/\*\s+viai18n-disable\s+\*\//.test(source)) return source // igore files with /* viai18n-disable */
   // use regString or delimiter to find targets
   let matchRegString = options.regString
   if (options.delimiter) {
