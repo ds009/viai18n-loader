@@ -14,7 +14,7 @@
         "blueimp-md5": "^2.10.0",
         "esprima": "^4.0.1",
         "htmlparser2": "^3.10.0",
-        "node-sass": "^4.12.0",
+        "node-sass": "^4.13.1",
         "sass-loader": "^7.1.0"
     }
 }
