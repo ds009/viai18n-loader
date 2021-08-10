@@ -1,12 +1,8 @@
 const loaderUtils = require('loader-utils')
 const utils = require('./utils')
-
-module.exports = function (source, map) {
+module.exports = function (source) {
   // init options
-  const urlQuery = this.resourceQuery
-    ? loaderUtils.parseQuery(this.resourceQuery)
-    : null
-  const options = Object.assign({}, loaderUtils.getOptions(this), urlQuery)
+  const options = loaderUtils.getOptions(this)
   if (!options.languages || !options.languages.length) {
     // languages must be set
     throw new Error('no languages are given in config for viai18n-loader')
@@ -14,7 +10,7 @@ module.exports = function (source, map) {
 
   // ignore excluded files
   if (!this.resourcePath || (options.exclude && this.resourcePath.match(options.exclude))) return source
-  if (/\/\*\s+viai18n-disable\s+\*\//.test(source)) return source // igore files with /* viai18n-disable */
+  if (/\/\*\s+viai18n-disable\s+\*\//.test(source)) return source // ignore files with /* viai18n-disable */
   // use regString or delimiter to find targets
   let matchRegString = options.regString
   if (options.delimiter) {
@@ -28,40 +24,49 @@ module.exports = function (source, map) {
   // remove comments to avoid translating texts in comments
   let sourceWithoutComment = utils.removeComments(source)
   const filePath = this.resourcePath.match(/(.*)((\.vue$)|(\.js$))/)
-  // find template and script part
+  let replacers = [];
   const replaceParts={}
-  const matchScript = utils.matchScript(sourceWithoutComment)
-  if (matchScript && matchScript[2]) {
-    replaceParts.parts=matchScript.slice(1) // will be used to replace and reform the source code
-    replaceParts.scriptIndex= 1
-    replaceParts.script = replaceParts.parts[1] // will be used to find target texts and generate replacers
-    // which part contains template
-    const matchStart = utils.matchTemplate(replaceParts.parts[0])
-    const matchEnd = utils.matchTemplate(replaceParts.parts[2])
-    if(matchStart){
-      replaceParts.templateIndex=0
-      replaceParts.template = matchStart[0]
+  const isJS = filePath[2] === '.js'
+  if(isJS) {
+    replacers = utils.generateScriptReplacers(sourceWithoutComment, matchRegString, options.delimiter);
+    replaceParts.parts = [sourceWithoutComment];
+    replaceParts.scriptIndex = 0;
+    replaceParts.script = sourceWithoutComment
+  } else {
+    // find template and script part
+    const matchScript = utils.matchScript(sourceWithoutComment)
+    if (matchScript && matchScript[2]) {
+      replaceParts.parts=matchScript.slice(1) // will be used to replace and reform the source code
+      replaceParts.scriptIndex= 1
+      replaceParts.script = replaceParts.parts[1] // will be used to find target texts and generate replacers
+      // which part contains template
+      const matchStart = utils.matchTemplate(replaceParts.parts[0])
+      const matchEnd = utils.matchTemplate(replaceParts.parts[2])
+      if(matchStart){
+        replaceParts.templateIndex=0
+        replaceParts.template = matchStart[0]
+      }
+      if(matchEnd){
+        replaceParts.templateIndex=2
+        replaceParts.template = matchEnd[0]
+      }
+    }else{
+      const matchTemplate = utils.matchTemplate(sourceWithoutComment)
+      if(matchTemplate){
+        replaceParts.parts=[sourceWithoutComment]
+        replaceParts.templateIndex=0
+        replaceParts.template =matchTemplate[0]
+      }
     }
-    if(matchEnd){
-      replaceParts.templateIndex=2
-      replaceParts.template = matchEnd[0]
-    }
-  }else{
-    const matchTemplate = utils.matchTemplate(sourceWithoutComment)
-    if(matchTemplate){
-      replaceParts.parts=[sourceWithoutComment]
-      replaceParts.templateIndex=0
-      replaceParts.template =matchTemplate[0]
-    }
-  }
 
-  // get replacers from script and template
-  let replacers = []
-  if (replaceParts.script) {// the second group is script body
-    replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.delimiter))
-  }
-  if (replaceParts.template) {
-    replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.delimiter))
+    // get replacers from script and template
+
+    if (replaceParts.script) {// the second group is script body
+      replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.delimiter))
+    }
+    if (replaceParts.template) {
+      replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.delimiter))
+    }
   }
   // replace old texts by new texts using regex
   if (replacers.length) {
@@ -104,7 +109,8 @@ module.exports = function (source, map) {
 
     // import messages
     // and insert $t (use default language if any language isn't found)
-    sourceWithoutComment = utils.insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
+    const insert$t = isJS?utils.insertJS$t:utils.insert$t;
+    sourceWithoutComment = insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
   }
   return sourceWithoutComment
 }

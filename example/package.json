@@ -5,12 +5,11 @@
     },
     "dependencies": {
         "chinese-s2t": "^1.0.0",
-        "nuxt": "^2.6.3",
+        "nuxt": "^2.15.3",
         "vuex": "^3.0.1",
         "webpack": "^4.27.1"
     },
     "devDependencies": {
-        "@babel/preset-es2015": "^7.0.0-beta.53",
         "blueimp-md5": "^2.10.0",
         "esprima": "^4.0.1",
         "htmlparser2": "^3.10.0",

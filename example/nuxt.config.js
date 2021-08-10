@@ -8,7 +8,7 @@ export default {
     extend(webpackConfig, { isDev, isClient }) {
       webpackConfig.resolveLoader.modules.push('..'); // for test only
       webpackConfig.module.rules.push({ // this loader will generate *.messages.json beside *.vue files
-        test: /\.vue$/,
+        test: /(\.vue$)|(\.i18n.js)/,
         exclude: [/node_modules/,/\.nuxt/],
         loader: 'viai18n-loader',
         enforce: 'pre',

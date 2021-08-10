@@ -28,7 +28,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           targets[node.value] = true
           const origin = trimText(delimiter ? matched[1] : removeQuotes(node.value))
           const hash = getTextKey(origin)
-          const newText = 'this.$t("' + hash + '")'
+          const newText = `this.$t("${hash}","${origin}")`
           replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash, isScript:true})
         }
       } else {
@@ -38,7 +38,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           groups.forEach(t => {
             const origin = trimText(t.match(new RegExp(matchRegString))[1])
             const hash = getTextKey(origin)
-            const newText = '${this.$t("' + hash + '")}'
+            const newText = `this.$t("${hash}","${origin}")`
             replacers.push({oldText: t, newText, origin, hash, isScript:true})
           })
         } else {
@@ -46,7 +46,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           if (groups && groups.length > 3) {
             const origin = trimText(groups[2])
             const hash = getTextKey(origin)
-            const newText = groups[1] + '${this.$t("' + hash + '")}' + groups[3]
+            const newText = groups[1] + '${this.$t("' + hash + '","'+origin+'")}' + groups[3]
             replacers.push({oldText: node.value, newText, origin, hash, isScript:true})
 
           } else {
@@ -266,15 +266,18 @@ function importMessages(filename) {
   return `import messages from "./${filename}.messages.json";`
 }
 
-function insert$t(filename, defaultLang, source) {
-  // messages put in computed so that languages shown can be switched without refresh the page
-  const messageProp = `
-    $t(key){
-      if(!this.$lang && !messages["${defaultLang}"]) return key;
+function get$t(defaultLang) {
+   // messages put in computed so that languages shown can be switched without refresh the page
+  return `
+    $t(key,origin){
+      if(!this.$lang && !messages["${defaultLang}"]) return origin;
       const trans = messages[this.$lang]||messages["${defaultLang}"]||{};
-      return trans[key]===undefined?key:trans[key];
+      return trans[key]===undefined?origin:trans[key];
     },
   `
+}
+function insert$t(filename, defaultLang, source) {
+  const messageProp =get$t(defaultLang);
   const simpleExport = 'export default { methods:{' + messageProp + '} }'
   // the original default may have different forms, we proxy it here by adding $t method
   const modifiedExport = `
@@ -299,13 +302,30 @@ function insert$t(filename, defaultLang, source) {
   }
 }
 
+function insertJS$t(filename, defaultLang, source) {
+  const messageProp =get$t(defaultLang);
+  // the original default may have different forms, we proxy it here by adding $t method
+  const modifiedExport = `
+    if ($defaultObject.methods){
+      Object.assign($defaultObject.methods,{${messageProp}})
+    }else{
+      $defaultObject.methods = {${messageProp}}
+    }
+    
+    export default $defaultObject
+  `
+  const importString = importMessages(filename)
+  const defaultObject = matchDefaultObject(source)
+  return source.replace(defaultObject[0], importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
+}
+
 function matchTemplate(source) {
   const matched = source.match(/<template>([\s\S]*)<\/template>/)
   return matched
 }
 
 function matchDefaultObject(source) {
-  const matched = source.match(/(export\s+default\s+)([\s\S]+)/)
+  const matched = source.match(/(export\s+default\s*)([\s\S]+)/)
   return matched
 }
 
@@ -326,6 +346,7 @@ module.exports = {
   generateTemplateReplacers,
   writeJsonToFile,
   insert$t,
+  insertJS$t,
   matchTemplate,
   matchScript,
   removeComments,

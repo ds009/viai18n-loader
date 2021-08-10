@@ -2,8 +2,8 @@
   <div class="page-index">
     <Header></Header>
     <h1>grhbrtg发个红包发个红包给</h1>
-    <p title="一段中文">{{test}}</p> <div class="row-item input-item">
-    <input v-model="contractAddress" placeholder="输入链接"  class="input">
+    <p style="color:red">{{tg}}</p>
+    <div class="row-item input-item">
   </div>
     <p class="name">反方规范腐反对跟复古风格个人更好听不让他果然要不你也认同隔壁认同蛋糕dfvre：</p>
     <div class="row-item input-item">
@@ -18,14 +18,16 @@
 
 <script>
   import Header from '../components/Header'
+  import TestMixin from "./mixin.i18n.js";
 
   export default {
     components: {Header},
     computed: {
       test() {
-        return '测试'
+        return this.test('title')
       },
     },
+    mixins:[TestMixin],
     data(){
       return {
         sourceCode: '测序的 v 呃呃奋斗奋斗'

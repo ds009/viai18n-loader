@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <div @mouseover="langShow=true" @mouseout="langShow=false" class="lang-config">
+    <div @mouseover="langShow=true" class="lang-config">
 
       <button id="set-lang">{{currentLangText}} {{$lang}}</button>
 
@@ -27,6 +27,7 @@
     methods: {
       onSetLang(item) {
         this.$store.dispatch("i18n/setLang", item.value);
+        this.langShow =false
       },
     }
   }
