@@ -1,6 +1,5 @@
 node_modules
 .idea
-example/node_modules
-example/.nuxt
+example
 /example/package-lock.json
 package-lock.json
