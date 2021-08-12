@@ -20,7 +20,8 @@ module.exports = function (source) {
     // nothing to translate
     return source;
   }
-  const filename = utils.getFileName(this.resourcePath)
+  const filename = utils.getFileName(this.resourcePath);
+  const as = '$' +(filename.replace(/[^a-z]/g,'')||'text');
   // remove comments to avoid translating texts in comments
   let sourceWithoutComment = utils.removeComments(source)
   const filePath = this.resourcePath.match(/(.*)((\.vue$)|(\.js$))/)
@@ -28,7 +29,7 @@ module.exports = function (source) {
   const replaceParts={}
   const isJS = filePath[2] === '.js'
   if(isJS) {
-    replacers = utils.generateScriptReplacers(sourceWithoutComment, matchRegString, options.delimiter);
+    replacers = utils.generateScriptReplacers(sourceWithoutComment, matchRegString, options.delimiter, as);
     replaceParts.parts = [sourceWithoutComment];
     replaceParts.scriptIndex = 0;
     replaceParts.script = sourceWithoutComment
@@ -62,10 +63,10 @@ module.exports = function (source) {
     // get replacers from script and template
 
     if (replaceParts.script) {// the second group is script body
-      replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.delimiter))
+      replacers = replacers.concat(utils.generateScriptReplacers(replaceParts.script, matchRegString, options.delimiter, as))
     }
     if (replaceParts.template) {
-      replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.delimiter))
+      replacers = replacers.concat(utils.generateTemplateReplacers(replaceParts.template, matchRegString, options.delimiter, as))
     }
   }
   // replace old texts by new texts using regex
@@ -110,7 +111,7 @@ module.exports = function (source) {
     // import messages
     // and insert $t (use default language if any language isn't found)
     const insert$t = isJS?utils.insertJS$t:utils.insert$t;
-    sourceWithoutComment = insert$t(filename, options.languages[0].key, replaceParts.parts.join(''))
+    sourceWithoutComment = insert$t(filename, options.languages[0].key, replaceParts.parts.join(''), as)
   }
   return sourceWithoutComment
 }

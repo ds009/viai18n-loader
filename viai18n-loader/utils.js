@@ -14,7 +14,7 @@ function removeQuotes(text) {
   return text.match(/^(\s*)['"](.*)['"](\s*)$/)[2]
 }
 
-function generateScriptReplacers(script, matchRegString, delimiter) {
+function generateScriptReplacers(script, matchRegString, delimiter, as='$t') {
   const tokens = esprima.tokenize(script)
   const replacers = []
   const targets = {}
@@ -28,7 +28,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           targets[node.value] = true
           const origin = trimText(delimiter ? matched[1] : removeQuotes(node.value))
           const hash = getTextKey(origin)
-          const newText = `this.$t("${hash}","${origin}")`
+          const newText = `this.${as}("${hash}","${origin}")`
           replacers.push({oldText: new RegExp(regSafeText(node.value), 'g'), newText, origin, hash, isScript:true})
         }
       } else {
@@ -38,7 +38,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           groups.forEach(t => {
             const origin = trimText(t.match(new RegExp(matchRegString))[1])
             const hash = getTextKey(origin)
-            const newText = `this.$t("${hash}","${origin}")`
+            const newText = `this.${as}("${hash}","${origin}")`
             replacers.push({oldText: t, newText, origin, hash, isScript:true})
           })
         } else {
@@ -46,7 +46,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
           if (groups && groups.length > 3) {
             const origin = trimText(groups[2])
             const hash = getTextKey(origin)
-            const newText = groups[1] + '${this.$t("' + hash + '","'+origin+'")}' + groups[3]
+            const newText = groups[1] + '${this.'+as+'("' + hash + '","'+origin+'")}' + groups[3]
             replacers.push({oldText: node.value, newText, origin, hash, isScript:true})
 
           } else {
@@ -60,7 +60,7 @@ function generateScriptReplacers(script, matchRegString, delimiter) {
   return replacers
 }
 
-function generateTemplateReplacers(template, matchRegString, delimiter) {
+function generateTemplateReplacers(template, matchRegString, delimiter, as='$t') {
   let replacers = []
   const parser = new htmlparser.Parser({
     onattribute(name, text) {
@@ -80,9 +80,9 @@ function generateTemplateReplacers(template, matchRegString, delimiter) {
               const hash = getTextKey(origin)
               // quotes in same type quotes cause bugs
               if(token[0]==='\''){
-                newText += "$t('" + hash + "')"
+                newText += as+"('" + hash + "')"
               }else{
-                newText += '$t("' + hash + '")'
+                newText += as+'("' + hash + '")'
               }
               replacers.push({origin, hash})
             } else {
@@ -94,13 +94,13 @@ function generateTemplateReplacers(template, matchRegString, delimiter) {
           const origin = trimText(delimiter ? matched[1] : text)
           const hash = getTextKey(origin)
           const oldTextReg = name + '\\s*=\\s*(\'|")' + regSafeText(text) + '(\'|")'
-          const newText = nameAsVariable(name) + '=\'$t("' + hash + '")\''
+          const newText = nameAsVariable(name) + '=\''+as+'("' + hash + '")\''
           replacers.push({oldText: new RegExp(oldTextReg), newText, origin, hash})
         }
       }
     },
     ontext(text) {
-      replacers = replacers.concat(parseExpressionInTemplate(text, matchRegString, delimiter))
+      replacers = replacers.concat(parseExpressionInTemplate(text, matchRegString, delimiter, as))
     }
   },{lowerCaseAttributeNames:false})
   parser.write(template)
@@ -108,7 +108,7 @@ function generateTemplateReplacers(template, matchRegString, delimiter) {
   return replacers
 }
 
-function parseExpressionInTemplate(text, matchRegString, delimiter) {
+function parseExpressionInTemplate(text, matchRegString, delimiter, as) {
   const replacers = []
   const targetReg = new RegExp(matchRegString)
   const matched = text.match(targetReg)
@@ -128,7 +128,7 @@ function parseExpressionInTemplate(text, matchRegString, delimiter) {
             // simple text in template
             const origin = trimText(delimiter ? matchStr[1] : t) // the whole text but not only matched, because it may be a mix of different languages
             const hash = getTextKey(origin)
-            newText += '{{$t("' + hash + '")}}'
+            newText += '{{'+as+'("' + hash + '")}}'
             replacers.push({origin, hash})// replace entire text once
           } else {
             const tokenInExpression = t.split(/("[\s\S]*?")|('[\s\S]*?')/)
@@ -142,9 +142,9 @@ function parseExpressionInTemplate(text, matchRegString, delimiter) {
                 const hash = getTextKey(origin)
                 // quotes in same type quotes cause bugs
                 if(token[0]==='\''){
-                  newText += "$t('" + hash + "')"
+                  newText += as+"('" + hash + "')"
                 }else{
-                  newText += '$t("' + hash + '")'
+                  newText += as+'("' + hash + '")'
                 }
                 replacers.push({origin, hash})
               } else {
@@ -162,7 +162,7 @@ function parseExpressionInTemplate(text, matchRegString, delimiter) {
       const origin = trimText(delimiter ? matched[1] : text)
       const hash = getTextKey(origin)
       const oldTextReg = '>\\s*' + regSafeText(text) + '\\s*<'
-      const newText = '>{{$t("' + hash + '")}}<'
+      const newText = '>{{'+as+'("' + hash + '")}}<'
       replacers.push({oldText: new RegExp(oldTextReg), newText, origin, hash})
     }
   }
@@ -262,22 +262,25 @@ function sortObjectByKey(unordered) {
   return ordered
 }
 
-function importMessages(filename) {
-  return `import messages from "./${filename}.messages.json";`
+function importMessages(filename, as) {
+  return `
+    import ${as}Messages from "./${filename}.messages.json";
+  `
 }
 
-function get$t(defaultLang) {
-   // messages put in computed so that languages shown can be switched without refresh the page
+function get$t(defaultLang, as) {
+  // messages put in computed so that languages shown can be switched without refresh the page
   return `
-    $t(key,origin){
-      if(!this.$lang && !messages["${defaultLang}"]) return origin;
+    ${as}(key,origin){
+      const messages = ${as}Messages;
+      if(!this.$lang && !messages["${defaultLang}"]) return origin||key;
       const trans = messages[this.$lang]||messages["${defaultLang}"]||{};
-      return trans[key]===undefined?origin:trans[key];
+      return trans[key]===undefined?(origin||key):trans[key];
     },
   `
 }
-function insert$t(filename, defaultLang, source) {
-  const messageProp =get$t(defaultLang);
+function insert$t(filename, defaultLang, source, as) {
+  const messageProp =get$t(defaultLang, as);
   const simpleExport = 'export default { methods:{' + messageProp + '} }'
   // the original default may have different forms, we proxy it here by adding $t method
   const modifiedExport = `
@@ -288,7 +291,7 @@ function insert$t(filename, defaultLang, source) {
     }
     export default $defaultObject
   `
-  const importString = importMessages(filename)
+  const importString = importMessages(filename,as)
   const script = matchScript(source)
   if (script) {
     const defaultObject = matchDefaultObject(script[2]) // script body
@@ -302,8 +305,8 @@ function insert$t(filename, defaultLang, source) {
   }
 }
 
-function insertJS$t(filename, defaultLang, source) {
-  const messageProp =get$t(defaultLang);
+function insertJS$t(filename, defaultLang, source, as) {
+  const messageProp =get$t(defaultLang, as);
   // the original default may have different forms, we proxy it here by adding $t method
   const modifiedExport = `
     if ($defaultObject.methods){
@@ -311,10 +314,10 @@ function insertJS$t(filename, defaultLang, source) {
     }else{
       $defaultObject.methods = {${messageProp}}
     }
-    
+
     export default $defaultObject
   `
-  const importString = importMessages(filename)
+  const importString = importMessages(filename,as)
   const defaultObject = matchDefaultObject(source)
   return source.replace(defaultObject[0], importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
 }
