@@ -21,7 +21,7 @@ module.exports = function (source) {
     return source;
   }
   const filename = utils.getFileName(this.resourcePath);
-  const as = '$' +(filename.replace(/[^a-z]/g,'')||'text');
+  const as = '$V' +(filename.replace(/\s/g,'')||'text');
   // remove comments to avoid translating texts in comments
   let sourceWithoutComment = utils.removeComments(source)
   const filePath = this.resourcePath.match(/(.*)((\.vue$)|(\.js$))/)
