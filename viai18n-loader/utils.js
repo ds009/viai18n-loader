@@ -263,7 +263,9 @@ function sortObjectByKey(unordered) {
 }
 
 function importMessages(filename, as) {
+  // disable viai18n to prevent repeating the process
   return `
+    /* viai18n-disable */
     import ${as}Messages from "./${filename}.messages.json";
   `
 }
@@ -295,10 +297,11 @@ function insert$t(filename, defaultLang, source, as) {
   const script = matchScript(source)
   if (script) {
     const defaultObject = matchDefaultObject(script[2]) // script body
+    // use function returned string to avoid '$' replacement bug
     if (defaultObject) {
-      return source.replace(defaultObject[0], importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
+      return source.replace(defaultObject[0], ()=>importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
     } else {
-      return source.replace(script[0], script[0] + importString + simpleExport) // script[0] === script[1]+script[2]
+      return source.replace(script[0], ()=>script[0] + importString + simpleExport) // script[0] === script[1]+script[2]
     }
   } else {
     return source + '<script>' + importString + simpleExport + '</script>'
@@ -319,7 +322,7 @@ function insertJS$t(filename, defaultLang, source, as) {
   `
   const importString = importMessages(filename,as)
   const defaultObject = matchDefaultObject(source)
-  return source.replace(defaultObject[0], importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
+  return source.replace(defaultObject[0], ()=> importString + 'const $defaultObject = ' + defaultObject[2] + '\n' + modifiedExport)
 }
 
 function matchTemplate(source) {
