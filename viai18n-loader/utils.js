@@ -2,7 +2,6 @@ const esprima = require('esprima')
 const htmlparser = require('htmlparser2') // high performance according to https://github.com/fb55/htmlparser2
 const md5 = require('blueimp-md5')
 const fs = require('fs')
-const deprecatedMark = '@DEPRECATED@'
 
 function getFileName(resourcePath) {
   const paths = resourcePath.split('/')
@@ -198,7 +197,7 @@ function textTranslated(key, text) {
   return key!==getTextKey(text)
 }
 
-function writeJsonToFile(data, filePath, ignoreDeprecatedMarkLangs=[]) {
+function writeJsonToFile(data, filePath) {
   try {
     const file = fs.readFileSync(filePath)
     const oldData = JSON.parse(file)
@@ -213,35 +212,8 @@ function writeJsonToFile(data, filePath, ignoreDeprecatedMarkLangs=[]) {
           if (oldData[lang][k] !== undefined) {
             // old text may be translated already, copy its value
             newData[lang][k] = oldData[lang][k]
-          } else {
-            // reuse deprecated old text
-            const dKey = k.replace(deprecatedMark, '')
-            if(oldData[lang][dKey]){
-              newData[lang][k] = oldData[lang][dKey]
-            }
           }
         })
-        if(ignoreDeprecatedMarkLangs.indexOf(lang)<0) {
-          Object.keys(oldData[lang]).forEach(k => {
-            // for each text which is translated but not in newData, mark as deprecated
-            if (textTranslated(k, oldData[lang][k]) && newData[lang][k] === undefined) {
-              if (k.indexOf(deprecatedMark) < 0) {
-                const dKey = k + deprecatedMark
-                // mark an old item as deprecated when no more in newData
-                newData[lang][dKey] = oldData[lang][k]
-              } else {
-                // a marked deprecated
-                const dKey = k.replace(deprecatedMark, '')
-                if (newData[lang][dKey] === undefined) {
-                  // not reused item, keep deprecated mark
-                  newData[lang][k] = oldData[lang][k]
-                } else {
-                  // reused, ignore the old deprecated mark item
-                }
-              }
-            }
-          })
-        }
       }
     })
     setTimeout(()=>fs.writeFileSync(filePath, JSON.stringify(sortObjectByKey(newData), null, 4), {flag: 'w'}),300) // update old file, timeout to trigger webpack reload

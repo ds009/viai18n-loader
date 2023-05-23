@@ -76,12 +76,8 @@ module.exports = function (source) {
       const data = {};
       const keepOriginal = text => text
       const defaultTranslator = options.languages[0].translator || keepOriginal
-      const ignoreDeprecatedMarkLangs = []
       options.languages.forEach(lang => {
         data[lang.key] = {}
-        if(lang.ignoreDeprecated) {
-          ignoreDeprecatedMarkLangs.push(lang.key)
-        }
       })
       replacers.forEach(replacer => {
         // replace source
@@ -97,7 +93,7 @@ module.exports = function (source) {
         }
       })
       // write file with cacheTime (to handle webpack rebuild bug)
-      utils.writeJsonToFile(data, filePath[1] + '.messages.json', ignoreDeprecatedMarkLangs)
+      utils.writeJsonToFile(data, filePath[1] + '.messages.json')
     } else {
       replacers.forEach(replacer => {
         // replace source
